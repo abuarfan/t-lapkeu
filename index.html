@@ -506,7 +506,7 @@
       </div>
 
       <button id="btnInstall" class="btn-ghost btn-mixed"
-              style="align-self: flex-end; display: none; margin-top: 4px;">
+              style="align-self: flex-end; display: none; margin-top: 5px;">
         Install aplikasi
       </button>
     </div>
@@ -523,44 +523,42 @@
           <span class="dot"></span>
           <span>Input Laporan Keuangan</span>
         </div>
+        
         <form id="form-laporan">
           <div class="form-grid">
             <div class="form-group">
-              <label for="tanggal">Mau laporan yang kapan?</label>
+              <label style="padding-top: 11px; padding-bottom: 9px;" for="tanggal">Mau laporan yang kapan?</label>
               <input type="date" id="tanggal" required />
-              <small class="hint">Format tanggal mengikuti pengaturan HP/komputer (contoh: 2025-11-26).</small>
             </div>
 
-            <div class="form-group">
-              <label>Siapa yang laporan?</label>
+          <div class="form-group">
+            <label style="padding-top: 11px; padding-bottom: 9px;">Siapa yang laporan?</label>
               <div class="toggle-group" id="pelaporToggle">
                 <button type="button" class="toggle-btn" data-value="Abi">Abi</button>
                 <button type="button" class="toggle-btn" data-value="Umi">Umi</button>
               </div>
-              <input type="hidden" id="pelapor" />
-            </div>
+            <input type="hidden" id="pelapor" />
+          </div>
 
             <div class="form-group">
-              <label>Jenis laporan apa?</label>
+              <label style="padding-top: 11px; padding-bottom: 9px;">Jenis laporan apa?</label>
               <div class="toggle-group" id="jenisToggle">
                 <button type="button" class="toggle-btn" data-value="pemasukan">Pemasukan</button>
                 <button type="button" class="toggle-btn" data-value="pengeluaran">Pengeluaran</button>
               </div>
               <input type="hidden" id="jenis" />
-              <small class="hint">Tipe laporan mempengaruhi rekomendasi rincian.</small>
             </div>
 
             <div class="form-group">
-              <label for="rincian">Ketik rincian laporan di bawah ya...</label>
+              <label style="padding-top: 11px; padding-bottom: 9px;" for="rincian">Ketik rincian laporan di bawah ya...</label>
               <input type="text" id="rincian" list="rincianList"
-                     placeholder="Misal: Gaji, Belanja bulanan, Infak, dll." required />
+                     placeholder="misal: Gaji, Belanja bulanan, Infak, dll." style="font-style: italic;" required />
               <datalist id="rincianList"></datalist>
-              <small class="hint">Ketik beberapa huruf, muncul rekomendasi dari laporan sebelumnya.</small>
             </div>
 
             <div class="form-group">
-              <label for="jumlah">Jumlah (Rp):</label>
-              <input type="number" id="jumlah" min="0" step="1000" placeholder="misal: 500000" required />
+              <label style="padding-top: 11px; padding-bottom: 9px;" for="jumlah">Jumlah (Rp):</label>
+              <input type="number" id="jumlah" min="0" step="1000" placeholder="misal: 500000" style="font-style: italic;" required />
             </div>
           </div>
 
@@ -584,9 +582,7 @@
         </div>
 
         <div class="top-summarizer">
-          <div>
-            <small>Mau lihat rekap bulan apa?</small>
-          </div>
+          <label style="padding-top: 11px; padding-bottom: 9px;">Mau lihat rekap bulan apa?</label>
           <div class="month-row">
             <input type="month" id="bulanRekap" class="month-input" />
             <button class="btn-ghost btn-mixed" id="btnRefreshRekap">Terapkan</button>
@@ -595,13 +591,13 @@
 
         <!-- REKAP ABI -->
         <div class="rekap-section">
-          <div class="rekap-title">Rekap Laporan Abi</div>
+          <div class="rekap-title" style="padding-top: 11px; padding-bottom: 9px;"><center>Rekap Laporan Abi</center></div>
           <div class="rekap-grid-2" id="rekap-abi-grid"></div>
         </div>
 
         <!-- REKAP UMI -->
         <div class="rekap-section">
-          <div class="rekap-title">Rekap Laporan Umi</div>
+          <div class="rekap-title" style="padding-top: 11px; padding-bottom: 9px;"><center>Rekap Laporan Umi</center></div>
           <div class="rekap-grid-2" id="rekap-umi-grid"></div>
         </div>
         </div>
