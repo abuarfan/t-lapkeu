@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Detail Laporan Keuangan</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#1d4ed8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --purple: #7c3aed;
+      --purple-soft: #ede9fe;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --white: #ffffff;
+      --dark: #0f172a;
+      --gray-soft: #f3f4f6;
+      --gray: #6b7280;
+      --red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, var(--purple-soft), var(--blue-soft));
+      padding: 16px;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 24px;
+      padding: 18px 14px 22px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 32px;
+      }
+      .page {
+        padding: 22px 22px 26px;
+        border-radius: 28px;
+      }
+    }
+
+    /* HEADER */
+    .header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .title-block {
+      padding: 14px 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #e5e7eb;
+      margin-top: 4px;
+    }
+
+    .badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .badge-brand,
+    .badge-role {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .badge-brand {
+      background: var(--purple-soft);
+      color: var(--purple);
+    }
+
+    .badge-role {
+      background: var(--blue-soft);
+      color: var(--blue);
+    }
+
+    /* BACK ROW */
+    .back-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 9px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3);
+      transition: background 0.1s, transform 0.1s, box-shadow 0.1s, opacity 0.1s;
+    }
+
+    .btn-back:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 11px 22px rgba(79, 70, 229, 0.4);
+    }
+
+    .info-label {
+      font-size: 0.78rem;
+      color: var(--gray);
+      display: flex;
+      justify-content: space-between;
+      min-width: 220px;
+      gap: 8px;
+    }
+
+    .info-label strong {
+      color: var(--dark);
+    }
+
+    /* CARD BLOCK (kotak isi) */
+    .card-block {
+      margin-top: 10px;
+      padding: 12px 10px;
+      border-radius: 16px;
+      background: #ffffff;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    @media (min-width: 768px) {
+      .card-block {
+        padding: 14px 12px;
+      }
+    }
+
+    /* TABEL */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin-top: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead {
+      background: linear-gradient(135deg, var(--blue-soft), var(--purple-soft));
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      text-align: center;
+      width: 40px;
+    }
+
+    /* Kolom jumlah & sisa rata kanan */
+    th:nth-child(4),
+    td:nth-child(4),
+    th:nth-child(5),
+    td:nth-child(5),
+    th:nth-child(6),
+    td:nth-child(6) {
+      text-align: right;
+      min-width: 120px;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    tfoot tr {
+      background: #f3f4f6;
+      font-weight: 700;
+    }
+
+    tfoot td {
+      border-top: 1px solid #d1d5db;
+    }
+
+    .empty-state {
+      font-size: 0.8rem;
+      color: var(--gray);
+      padding: 12px 4px 4px;
+    }
+
+    /* EDIT NOMINAL */
+    .edit-actions {
+      margin-top: 12px;
+    }
+
+    .btn-save-edit {
+      border-radius: 999px;
+      border: none;
+      padding: 9px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .btn-save-edit:disabled {
+      opacity: 0.5;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .edit-hint {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-top: 4px;
+    }
+
+    .edited-cell {
+      background-color: rgba(199, 210, 254, 0.6);
+    }
+
+    /* CHART RINCIAN */
+    .chart-section {
+      margin-top: 4px;
+    }
+
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .chart-subtitle {
+      font-size: 0.75rem;
+      color: var(--gray);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .chart-bar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .chart-bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .chart-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--dark);
+      gap: 8px;
+    }
+
+    .chart-bar-label span:first-child {
+      max-width: 60%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chart-bar-label span:last-child {
+      text-align: right;
+      color: var(--gray);
+    }
+
+    .chart-bar-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--purple));
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(10px);
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.35);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="title-block">
+        <div class="title" id="pageTitle">Detail Laporan</div>
+        <div class="subtitle" id="pageSubtitle"></div>
+      </div>
+      <div class="badge-row">
+        <span class="badge-brand">Abi &amp; Umi Finance</span>
+        <span class="badge-role" id="tagRole"></span>
+      </div>
+    </div>
+
+    <!-- BACK ROW -->
+    <div class="back-row">
+      <button class="btn-back" type="button" onclick="window.location.href='index.html#rekap'">
+        ⬅️ Kembali ke Rekap Bulanan
+      </button>
+      <div class="info-label" id="infoBulan"></div>
+    </div>
+      <div class="edit-hint" id="editHint">
+        Tekan rincian atau nominal jumlah di tabel untuk mengubah, lalu simpan.
+      </div>
+
+    <!-- KOTAK 1: TABEL + SIMPAN -->
+    <div class="card-block">
+      <div class="table-wrapper">
+        <table id="detailTable">
+          <thead>
+            <tr id="theadRow">
+              <th>No</th>
+              <th>Tanggal</th>
+              <th>Rincian</th>
+              <th>Jumlah (Rp)</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDetail">
+            <!-- diisi via JS -->
+          </tbody>
+          <tfoot id="tfootDetail">
+            <!-- total -->
+          </tfoot>
+        </table>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          Belum ada transaksi untuk filter ini.
+        </div>
+      </div>
+
+      <div class="edit-actions">
+        <button type="button" class="btn-save-edit" id="btnSaveEdits" disabled>
+          Simpan
+          <span>💾</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- KOTAK 2: CHART (DISABLE JIKA TIPE = SISA) -->
+    <div class="card-block" id="chartCard">
+      <div class="chart-section">
+        <div class="chart-title" id="chartTitle">Diagram rincian</div>
+        <div class="chart-subtitle" id="chartSubtitle"></div>
+        <div id="chartBarList" class="chart-bar-list"></div>
+        <div class="empty-state" id="chartEmpty" style="display:none;">
+          Belum ada cukup data untuk menampilkan diagram rincian.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase config (sama dengan index.html)
+    const supabaseUrl = 'https://jrctmnialwrsmqsimorz.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyY3RtbmlhbHdyc21xc2ltb3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMTE4MjgsImV4cCI6MjA3OTc4NzgyOH0.KwX7CqXIQJFM-YR-ovRjnHD6qkde0T5goVZUUQCZ4do';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role');   // Abi / Umi
+    const tipe = params.get('tipe');   // pemasukan / pengeluaran / sisa
+    const bulanKey = params.get('bulan'); // YYYY-MM
+
+    const pageTitleEl    = document.getElementById("pageTitle");
+    const pageSubtitleEl = document.getElementById("pageSubtitle");
+    const tagRoleEl      = document.getElementById("tagRole");
+    const infoBulanEl    = document.getElementById("infoBulan");
+    const tbodyDetail    = document.getElementById("tbodyDetail");
+    const tfootDetail    = document.getElementById("tfootDetail");
+    const emptyStateEl   = document.getElementById("emptyState");
+    const theadRow       = document.getElementById("theadRow");
+    const btnSaveEdits   = document.getElementById("btnSaveEdits");
+    const editHint       = document.getElementById("editHint");
+
+    // chart elements
+    const chartCardEl     = document.getElementById("chartCard");
+    const chartTitleEl    = document.getElementById("chartTitle");
+    const chartSubtitleEl = document.getElementById("chartSubtitle");
+    const chartBarListEl  = document.getElementById("chartBarList");
+    const chartEmptyEl    = document.getElementById("chartEmpty");
+
+    // --- TOAST HELPER ---
+    let toastTimeout;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Map id_transaksi -> { jumlah: number|null, rincian: string|null }
+    const pendingEdits = new Map();
+
+    function getEditRecord(id) {
+      if (!pendingEdits.has(id)) {
+        pendingEdits.set(id, { jumlah: null, rincian: null });
+      }
+      return pendingEdits.get(id);
+    }
+
+    function hasAnyChanges() {
+      for (const rec of pendingEdits.values()) {
+        if (rec.jumlah !== null || rec.rincian !== null) return true;
+      }
+      return false;
+    }
+
+    function cleanEmptyEdits() {
+      for (const [id, rec] of pendingEdits.entries()) {
+        if (rec.jumlah === null && rec.rincian === null) {
+          pendingEdits.delete(id);
+        }
+      }
+    }
+
+    function formatRupiah(angka) {
+      const n = Number(angka) || 0;
+      return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }).format(n);
+    }
+
+    function monthLabel(bulanKey) {
+      if (!bulanKey) return "-";
+      const [y, m] = bulanKey.split("-");
+      const monthNames = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+      ];
+      const idx = Number(m) - 1;
+      const nama = monthNames[idx] || m;
+      return `${nama} ${y}`;
+    }
+
+    function tipeLabel(role, tipe) {
+      if (!role || !tipe) return "Detail Laporan";
+      const r = role;
+      if (tipe === "pemasukan") return `Pemasukan ${r}`;
+      if (tipe === "pengeluaran") return `Pengeluaran ${r}`;
+      if (tipe === "sisa") return `Sisa ${r}`;
+      return "Detail Laporan";
+    }
+
+    function tipeSubtitle(tipe) {
+      if (tipe === "pemasukan") {
+        return "Menampilkan semua transaksi pemasukan sesuai bulan yang dipilih.";
+      } else if (tipe === "pengeluaran") {
+        return "Menampilkan semua transaksi pengeluaran sesuai bulan yang dipilih.";
+      } else if (tipe === "sisa") {
+        return "Menampilkan semua transaksi dan menghitung sisa (pemasukan - pengeluaran) sebagai saldo berjalan.";
+      }
+      return "";
+    }
+
+    function updateEditHint() {
+      cleanEmptyEdits();
+      const hasEdits = hasAnyChanges();
+      btnSaveEdits.disabled = !hasEdits;
+      if (hasEdits) {
+        editHint.textContent = 'Ada revisi yang belum disimpan. Klik "Simpan" untuk mengupdate data.';
+      } else {
+        editHint.textContent = 'Tekan rincian atau nominal jumlah di tabel untuk merevisi, lalu simpan.';
+      }
+    }
+
+    function attachAmountEditListeners() {
+      const cells = document.querySelectorAll(".editable-amount");
+      cells.forEach(cell => {
+        cell.addEventListener("click", () => {
+          if (cell.dataset.editing === "true") return;
+
+          const id = cell.dataset.id;
+          const original = Number(cell.dataset.original || 0);
+
+          const rec = getEditRecord(id);
+          const currentValue = rec.jumlah !== null ? rec.jumlah : original;
+
+          cell.dataset.editing = "true";
+
+          const input = document.createElement("input");
+          input.type = "number";
+          input.min = "0";
+          input.step = "1000";
+          input.value = currentValue;
+          input.style.width = "100%";
+          input.style.boxSizing = "border-box";
+          input.style.fontSize = "0.8rem";
+          input.style.padding = "4px 6px";
+
+          input.addEventListener("click", (e) => e.stopPropagation());
+
+          const finishEdit = (commit) => {
+            const raw = Number(input.value || 0);
+            cell.dataset.editing = "false";
+
+            if (commit && !isNaN(raw) && raw >= 0 && raw !== original) {
+              const rec = getEditRecord(id);
+              rec.jumlah = raw;
+              cell.innerHTML = formatRupiah(raw);
+              cell.classList.add("edited-cell");
+            } else {
+              const rec = getEditRecord(id);
+              if (!isNaN(raw) && raw === original) {
+                rec.jumlah = null;
+              }
+              const display = rec.jumlah !== null ? rec.jumlah : original;
+              cell.innerHTML = formatRupiah(display);
+              if (rec.jumlah === null) {
+                cell.classList.remove("edited-cell");
+              }
+            }
+            updateEditHint();
+          };
+
+          input.addEventListener("blur", () => finishEdit(true));
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              input.blur();
+            } else if (e.key === "Escape") {
+              cell.dataset.editing = "false";
+              const rec = getEditRecord(id);
+              const display = rec.jumlah !== null ? rec.jumlah : original;
+              cell.innerHTML = formatRupiah(display);
+            }
+          });
+
+          cell.innerHTML = "";
+          cell.appendChild(input);
+          input.focus();
+          input.select();
+        });
+      });
+    }
+
+    function attachRincianEditListeners() {
+      const cells = document.querySelectorAll(".editable-rincian");
+      cells.forEach(cell => {
+        cell.addEventListener("click", () => {
+          if (cell.dataset.editing === "true") return;
+
+          const id = cell.dataset.id;
+          const original = cell.dataset.original || "";
+
+          const rec = getEditRecord(id);
+          const currentValue = rec.rincian !== null ? rec.rincian : original;
+
+          cell.dataset.editing = "true";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = currentValue;
+          input.style.width = "100%";
+          input.style.boxSizing = "border-box";
+          input.style.fontSize = "0.8rem";
+          input.style.padding = "4px 6px";
+
+          input.addEventListener("click", (e) => e.stopPropagation());
+
+          const finishEdit = (commit) => {
+            const raw = (input.value || "").trim();
+            cell.dataset.editing = "false";
+
+            if (commit && raw !== "" && raw !== original) {
+              const rec = getEditRecord(id);
+              rec.rincian = raw;
+              cell.textContent = raw;
+              cell.classList.add("edited-cell");
+            } else {
+              const rec = getEditRecord(id);
+              if (raw === original) {
+                rec.rincian = null;
+              }
+              const display = rec.rincian !== null ? rec.rincian : original;
+              cell.textContent = display;
+              if (rec.rincian === null) {
+                cell.classList.remove("edited-cell");
+              }
+            }
+            updateEditHint();
+          };
+
+          input.addEventListener("blur", () => finishEdit(true));
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              input.blur();
+            } else if (e.key === "Escape") {
+              cell.dataset.editing = "false";
+              const rec = getEditRecord(id);
+              const display = rec.rincian !== null ? rec.rincian : original;
+              cell.textContent = display;
+            }
+          });
+
+          cell.innerHTML = "";
+          cell.appendChild(input);
+          input.focus();
+          input.select();
+        });
+      });
+    }
+
+    function attachEditListeners() {
+      attachAmountEditListeners();
+      attachRincianEditListeners();
+    }
+
+    function renderRincianChart(rows, tipe) {
+      // Tidak ada chart untuk tipe "sisa"
+      if (tipe === "sisa") {
+        chartCardEl.style.display = "none";
+        return;
+      }
+
+      chartCardEl.style.display = "block";
+      chartBarListEl.innerHTML = "";
+      chartEmptyEl.style.display = "none";
+      chartSubtitleEl.textContent = "";
+
+      if (!rows || !rows.length) {
+        chartEmptyEl.style.display = "block";
+        return;
+      }
+
+      let baseJenis = null;
+      if (tipe === "pemasukan") baseJenis = "pemasukan";
+      else if (tipe === "pengeluaran") baseJenis = "pengeluaran";
+
+      let filteredRows = rows;
+      if (baseJenis) {
+        filteredRows = rows.filter(r => r.jenis === baseJenis);
+      }
+
+      if (!filteredRows.length) {
+        chartEmptyEl.style.display = "block";
+        chartSubtitleEl.textContent = "Belum ada data yang sesuai untuk dihitung.";
+        return;
+      }
+
+      const mapStats = new Map();
+      let grandTotal = 0;
+
+      filteredRows.forEach(t => {
+        const rincian = (t.rincian || "Tanpa rincian").trim() || "Tanpa rincian";
+        const jumlah = Number(t.jumlah || 0);
+        grandTotal += jumlah;
+
+        if (!mapStats.has(rincian)) {
+          mapStats.set(rincian, { count: 0, total: 0 });
+        }
+        const obj = mapStats.get(rincian);
+        obj.count += 1;
+        obj.total += jumlah;
+      });
+
+      if (!grandTotal) {
+        chartEmptyEl.style.display = "block";
+        chartSubtitleEl.textContent = "Total nominal masih 0, belum bisa ditampilkan sebagai diagram.";
+        return;
+      }
+
+      const arr = Array.from(mapStats.entries()).map(([rincian, v]) => ({
+        rincian,
+        count: v.count,
+        total: v.total
+      }));
+
+      arr.sort((a, b) => b.total - a.total || b.count - a.count);
+
+      const top = arr.slice(0, 8);
+      const maxTotal = Math.max(...top.map(x => x.total));
+
+      const jenisLabel = baseJenis === "pemasukan" ? "pemasukan" : "pengeluaran";
+      const titleLabel = baseJenis === "pemasukan" ? "Pemasukan Terbanyak" : "Pengeluaran Terbanyak";
+
+      chartTitleEl.textContent = titleLabel;
+      chartSubtitleEl.textContent =
+        `Rincian dengan total ${jenisLabel} terbesar pada bulan ini.`;
+
+      top.forEach(item => {
+        const percent = (item.total / grandTotal) * 100;
+        const percentDisplay = Math.round(percent);
+        const widthPercent = maxTotal ? (item.total / maxTotal) * 100 : 0;
+
+        const row = document.createElement("div");
+        row.className = "chart-bar-row";
+        row.innerHTML = `
+          <div class="chart-bar-label">
+            <span>${item.rincian} (${item.count}x)</span>
+            <span>${formatRupiah(item.total)} (${percentDisplay}%)</span>
+          </div>
+          <div class="chart-bar-track">
+            <div class="chart-bar-fill" style="width:${widthPercent}%;"></div>
+          </div>
+        `;
+        chartBarListEl.appendChild(row);
+      });
+    }
+
+    async function loadDetail() {
+      if (!role || !tipe || !bulanKey) {
+        pageTitleEl.textContent = "Filter tidak lengkap";
+        emptyStateEl.textContent = "URL kurang lengkap. Pastikan membuka halaman ini lewat kotak rekap bulanan.";
+        emptyStateEl.style.display = "block";
+        chartCardEl.style.display = "none";
+        return;
+      }
+
+      pendingEdits.clear();
+      updateEditHint();
+
+      pageTitleEl.textContent    = tipeLabel(role, tipe);
+      pageSubtitleEl.textContent = tipeSubtitle(tipe);
+      tagRoleEl.textContent      = `Pelapor: ${role}`;
+      infoBulanEl.innerHTML      = `
+        <span><strong>Bulan:</strong> ${monthLabel(bulanKey)}</span>
+        <span><strong>Kode:</strong> ${bulanKey}</span>
+      `;
+
+      if (tipe === "sisa") {
+        theadRow.innerHTML = `
+          <th>No</th>
+          <th>Tanggal</th>
+          <th>Rincian</th>
+          <th>Jumlah Pemasukan (Rp)</th>
+          <th>Jumlah Pengeluaran (Rp)</th>
+          <th>Sisa (Rp)</th>
+        `;
+      } else {
+        theadRow.innerHTML = `
+          <th>No</th>
+          <th>Tanggal</th>
+          <th>Rincian</th>
+          <th>Jumlah (Rp)</th>
+        `;
+      }
+
+      let query = supabase
+        .from('transaksi_keuangan')
+        .select('*')
+        .eq('bulan_key', bulanKey)
+        .eq('pelapor', role);
+
+      if (tipe === "pemasukan" || tipe === "pengeluaran") {
+        query = query.eq('jenis', tipe);
+      }
+
+      const { data, error } = await query.order('tanggal', { ascending: true });
+
+      if (error) {
+        console.error('Gagal load detail:', error);
+        emptyStateEl.textContent = "Gagal memuat data dari server.";
+        emptyStateEl.style.display = "block";
+        chartCardEl.style.display = (tipe === "sisa") ? "none" : "block";
+        return;
+      }
+
+      const rows = data || [];
+
+      if (!rows.length) {
+        tbodyDetail.innerHTML = "";
+        tfootDetail.innerHTML = "";
+        emptyStateEl.style.display = "block";
+        renderRincianChart([], tipe);
+        return;
+      }
+
+      emptyStateEl.style.display = "none";
+
+      if (tipe === "pemasukan" || tipe === "pengeluaran") {
+        let htmlBody = "";
+        let total = 0;
+
+        rows.forEach((t, idx) => {
+          const jumlah = Number(t.jumlah || 0);
+          total += jumlah;
+          const safeRincian = (t.rincian || "").replace(/</g, "&lt;");
+
+          htmlBody += `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>${t.tanggal}</td>
+              <td class="editable-rincian" data-id="${t.id}" data-original="${safeRincian}">
+                ${safeRincian}
+              </td>
+              <td class="editable-amount" data-id="${t.id}" data-original="${jumlah}">
+                ${formatRupiah(jumlah)}
+              </td>
+            </tr>
+          `;
+        });
+
+        tbodyDetail.innerHTML = htmlBody;
+
+        const labelTotal = tipe === "pemasukan" ? "Total pemasukan" : "Total pengeluaran";
+
+        tfootDetail.innerHTML = `
+          <tr>
+            <td></td>
+            <td></td>
+            <td>${labelTotal}</td>
+            <td>${formatRupiah(total)}</td>
+          </tr>
+        `;
+      } else {
+        // MODE SISA
+        let htmlBody = "";
+        let runningSisa = 0;
+        let totalPemasukan = 0;
+        let totalPengeluaran = 0;
+
+        rows.forEach((t, idx) => {
+          const jumlah = Number(t.jumlah || 0);
+          const safeRincian = (t.rincian || "").replace(/</g, "&lt;");
+          let cellPemasukan = "";
+          let cellPengeluaran = "";
+
+          if (t.jenis === "pemasukan") {
+            runningSisa += jumlah;
+            totalPemasukan += jumlah;
+            cellPemasukan = `
+              <td class="editable-amount" data-id="${t.id}" data-original="${jumlah}">
+                ${formatRupiah(jumlah)}
+              </td>
+            `;
+            cellPengeluaran = `<td></td>`;
+          } else if (t.jenis === "pengeluaran") {
+            runningSisa -= jumlah;
+            totalPengeluaran += jumlah;
+            cellPemasukan = `<td></td>`;
+            cellPengeluaran = `
+              <td class="editable-amount" data-id="${t.id}" data-original="${jumlah}">
+                ${formatRupiah(jumlah)}
+              </td>
+            `;
+          } else {
+            cellPemasukan = `<td></td>`;
+            cellPengeluaran = `<td></td>`;
+          }
+
+          htmlBody += `
+            <tr>
+              <td>${idx + 1}</td>
+              <td>${t.tanggal}</td>
+              <td class="editable-rincian" data-id="${t.id}" data-original="${safeRincian}">
+                ${safeRincian}
+              </td>
+              ${cellPemasukan}
+              ${cellPengeluaran}
+              <td>${formatRupiah(runningSisa)}</td>
+            </tr>
+          `;
+        });
+
+        tbodyDetail.innerHTML = htmlBody;
+
+        tfootDetail.innerHTML = `
+          <tr>
+            <td></td>
+            <td></td>
+            <td>Total sisa (pemasukan - pengeluaran)</td>
+            <td>${formatRupiah(totalPemasukan)}</td>
+            <td>${formatRupiah(totalPengeluaran)}</td>
+            <td>${formatRupiah(runningSisa)}</td>
+          </tr>
+        `;
+      }
+
+      attachEditListeners();
+      updateEditHint();
+      renderRincianChart(rows, tipe);
+    }
+
+    btnSaveEdits.addEventListener("click", async () => {
+      cleanEmptyEdits();
+      if (!hasAnyChanges()) return;
+
+      btnSaveEdits.disabled = true;
+      editHint.textContent = "Menyimpan revisi ke server...";
+
+      for (const [id, rec] of pendingEdits.entries()) {
+        const updateObj = {};
+        if (rec.jumlah !== null)  updateObj.jumlah  = rec.jumlah;
+        if (rec.rincian !== null) updateObj.rincian = rec.rincian;
+
+        if (Object.keys(updateObj).length === 0) continue;
+
+        const { error } = await supabase
+          .from('transaksi_keuangan')
+          .update(updateObj)
+          .eq('id', id);
+
+        if (error) {
+          console.error("Gagal update id", id, error);
+          showToast("Sebagian revisi gagal disimpan. Cek console.");
+        }
+      }
+
+      pendingEdits.clear();
+      await loadDetail();
+      showToast("Revisi berhasil disimpan.");
+    });
+
+    loadDetail();
+  </script>
+</body>
+</html>
