@@ -872,30 +872,30 @@
       const r = await hitungRekap(bulanKey);
 
       abiGrid.innerHTML = `
-        <div class="rekap-card rekap-click" data-role="ABI" data-tipe="pemasukan">
+        <div class="rekap-card rekap-click" data-role="Abi" data-tipe="pemasukan">
           <h3>Pemasukan:</h3>
           <div class="rekap-value">${formatRupiah(r.pemasukanAbi)}</div>
         </div>
-        <div class="rekap-card rekap-click" data-role="ABI" data-tipe="pengeluaran">
+        <div class="rekap-card rekap-click" data-role="Abi" data-tipe="pengeluaran">
           <h3>Pengeluaran:</h3>
           <div class="rekap-value">${formatRupiah(r.pengeluaranAbi)}</div>
         </div>
-        <div class="rekap-card full rekap-click" data-role="ABI" data-tipe="sisa">
+        <div class="rekap-card full rekap-click" data-role="Abi" data-tipe="sisa">
           <h3>Sisa</h3>
           <div class="rekap-value">${formatRupiah(r.sisaAbi)}</div>
         </div>
       `;
 
       umiGrid.innerHTML = `
-        <div class="rekap-card rekap-click" data-role="UMI" data-tipe="pemasukan">
+        <div class="rekap-card rekap-click" data-role="Umi" data-tipe="pemasukan">
           <h3>Pemasukan:</h3>
           <div class="rekap-value">${formatRupiah(r.pemasukanUmi)}</div>
         </div>
-        <div class="rekap-card rekap-click" data-role="UMI" data-tipe="pengeluaran">
+        <div class="rekap-card rekap-click" data-role="Umi" data-tipe="pengeluaran">
           <h3>Pengeluaran:</h3>
           <div class="rekap-value">${formatRupiah(r.pengeluaranUmi)}</div>
         </div>
-        <div class="rekap-card full rekap-click" data-role="UMI" data-tipe="sisa">
+        <div class="rekap-card full rekap-click" data-role="Umi" data-tipe="sisa">
           <h3>Sisa:</h3>
           <div class="rekap-value">${formatRupiah(r.sisaUmi)}</div>
         </div>
