@@ -190,6 +190,13 @@
       white-space: nowrap;
     }
 
+    /* Mode normal (pemasukan / pengeluaran): kolom Rincian boleh wrap */
+    .table-can-wrap th:nth-child(3),
+    .table-can-wrap td:nth-child(3) {
+      white-space: normal;
+      word-break: break-word;
+    }
+
     th:nth-child(1),
     td:nth-child(1) {
       text-align: center;
@@ -255,9 +262,11 @@
     }
 
     .edit-hint {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--gray);
-      margin-top: 4px;
+      margin-top: 6px;
+      text-align: right;
+      font-style: italic;
     }
 
     .edited-cell {
@@ -268,6 +277,15 @@
     .chart-section {
       margin-top: 4px;
     }
+
+    .table-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
 
     .chart-title {
       font-size: 0.85rem;
@@ -353,6 +371,43 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+    @media (max-width: 640px) {
+    .card-block {
+      padding: 10px 8px;
+    }
+  
+    .table-wrapper {
+      margin-top: 2px;
+    }
+  
+    /* sel tabel sedikit lebih rapat, tapi font tetap sama */
+    th, td {
+      padding: 6px 6px;
+    }
+  
+    /* kolom No lebih sempit */
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 32px;
+    }
+  
+    /* kolom Tanggal dibatasi */
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 80px;
+    }
+  
+    /* kolom jumlah / sisa tidak terlalu lebar */
+    th:nth-child(4),
+    td:nth-child(4),
+    th:nth-child(5),
+    td:nth-child(5),
+    th:nth-child(6),
+    td:nth-child(6) {
+      min-width: 90px;
+    }
+  }
+
   </style>
 </head>
 <body>
@@ -376,12 +431,26 @@
       </button>
       <div class="info-label" id="infoBulan"></div>
     </div>
-      <div class="edit-hint" id="editHint">
-        Tekan rincian atau nominal jumlah di tabel untuk mengubah, lalu simpan.
-      </div>
 
-    <!-- KOTAK 1: TABEL + SIMPAN -->
+    <!-- KOTAK 1 (BARU): CHART RINCIAN / PEMASUKAN/PENGELUARAN TERBANYAK -->
+    <div class="card-block" id="chartCard">
+      <div class="chart-section">
+        <div class="chart-title" id="chartTitle">Diagram rincian</div>
+        <div class="chart-subtitle" id="chartSubtitle"></div>
+        <div id="chartBarList" class="chart-bar-list"></div>
+        <div class="empty-state" id="chartEmpty" style="display:none;">
+          Belum ada data untuk menampilkan diagram rincian.
+        </div>
+      </div>
+    </div>
+
+    <!-- KOTAK 2: TABEL RINCIAN + SIMPAN -->
     <div class="card-block">
+      <!-- judul tabel baru -->
+      <div class="table-title" id="tableTitle">
+        Rincian Pemasukan/Pengeluaran
+      </div>
+    
       <div class="table-wrapper">
         <table id="detailTable">
           <thead>
@@ -403,7 +472,12 @@
           Tidak ada transaksi pada bulan ini.
         </div>
       </div>
-
+    
+      <!-- hint footer tabel -->
+      <div class="edit-hint" id="editHint">
+        ✏️ Klik rincian atau jumlah untuk mengedit.
+      </div>
+    
       <div class="edit-actions">
         <button type="button" class="btn-save-edit" id="btnSaveEdits" disabled>
           Simpan
@@ -412,23 +486,11 @@
       </div>
     </div>
 
-    <!-- KOTAK 2: CHART (DISABLE JIKA TIPE = SISA) -->
-    <div class="card-block" id="chartCard">
-      <div class="chart-section">
-        <div class="chart-title" id="chartTitle">Diagram rincian</div>
-        <div class="chart-subtitle" id="chartSubtitle"></div>
-        <div id="chartBarList" class="chart-bar-list"></div>
-        <div class="empty-state" id="chartEmpty" style="display:none;">
-          Belum ada data untuk menampilkan diagram rincian.
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div id="toast" class="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // Supabase config (sama dengan index.html)
     const supabaseUrl = 'https://jrctmnialwrsmqsimorz.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyY3RtbmlhbHdyc21xc2ltb3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQyMTE4MjgsImV4cCI6MjA3OTc4NzgyOH0.KwX7CqXIQJFM-YR-ovRjnHD6qkde0T5goVZUUQCZ4do';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -448,6 +510,9 @@
     const theadRow       = document.getElementById("theadRow");
     const btnSaveEdits   = document.getElementById("btnSaveEdits");
     const editHint       = document.getElementById("editHint");
+    const tableTitleEl   = document.getElementById("tableTitle");
+    const detailTable    = document.getElementById("detailTable");
+
 
     // chart elements
     const chartCardEl     = document.getElementById("chartCard");
@@ -540,9 +605,9 @@
       const hasEdits = hasAnyChanges();
       btnSaveEdits.disabled = !hasEdits;
       if (hasEdits) {
-        editHint.textContent = 'Ada revisi yang belum disimpan. Tekan "Simpan" untuk mengupdate data.';
+        editHint.textContent = '✏️ Ada revisi yang belum disimpan. Tekan "Simpan" untuk mengupdate data.';
       } else {
-        editHint.textContent = 'Tekan rincian atau nominal jumlah di tabel untuk merevisi, lalu simpan.';
+        editHint.textContent = '✏️ Klik rincian atau jumlah untuk mengedit.';
       }
     }
 
@@ -695,40 +760,51 @@
         chartCardEl.style.display = "none";
         return;
       }
-
+    
       chartCardEl.style.display = "block";
       chartBarListEl.innerHTML = "";
       chartEmptyEl.style.display = "none";
-      chartSubtitleEl.textContent = "";
-
-      if (!rows || !rows.length) {
-        chartEmptyEl.style.display = "block";
-        return;
-      }
-
+    
       let baseJenis = null;
       if (tipe === "pemasukan") baseJenis = "pemasukan";
       else if (tipe === "pengeluaran") baseJenis = "pengeluaran";
-
+    
+      // judul baru yang lebih soft
+      if (baseJenis === "pemasukan") {
+        chartTitleEl.textContent = "Sorotan Pemasukan Bulan Ini";
+      } else if (baseJenis === "pengeluaran") {
+        chartTitleEl.textContent = "Sorotan Pengeluaran Bulan Ini";
+      } else {
+        chartTitleEl.textContent = "Sorotan Transaksi Bulan Ini";
+      }
+    
+      chartSubtitleEl.textContent = "";
+    
+      if (!rows || !rows.length) {
+        chartEmptyEl.style.display = "block";
+        chartSubtitleEl.textContent = "Belum ada data untuk ditampilkan pada bulan ini.";
+        return;
+      }
+    
       let filteredRows = rows;
       if (baseJenis) {
         filteredRows = rows.filter(r => r.jenis === baseJenis);
       }
-
+    
       if (!filteredRows.length) {
         chartEmptyEl.style.display = "block";
         chartSubtitleEl.textContent = "Belum ada data yang sesuai untuk dihitung.";
         return;
       }
-
+    
       const mapStats = new Map();
       let grandTotal = 0;
-
+    
       filteredRows.forEach(t => {
         const rincian = (t.rincian || "Tanpa rincian").trim() || "Tanpa rincian";
         const jumlah = Number(t.jumlah || 0);
         grandTotal += jumlah;
-
+    
         if (!mapStats.has(rincian)) {
           mapStats.set(rincian, { count: 0, total: 0 });
         }
@@ -736,36 +812,34 @@
         obj.count += 1;
         obj.total += jumlah;
       });
-
+    
       if (!grandTotal) {
         chartEmptyEl.style.display = "block";
         chartSubtitleEl.textContent = "Total nominal masih 0, belum bisa ditampilkan sebagai diagram.";
         return;
       }
-
+    
       const arr = Array.from(mapStats.entries()).map(([rincian, v]) => ({
         rincian,
         count: v.count,
         total: v.total
       }));
-
+    
       arr.sort((a, b) => b.total - a.total || b.count - a.count);
-
+    
       const top = arr.slice(0, 8);
       const maxTotal = Math.max(...top.map(x => x.total));
-
+    
       const jenisLabel = baseJenis === "pemasukan" ? "pemasukan" : "pengeluaran";
-      const titleLabel = baseJenis === "pemasukan" ? "Pemasukan Terbanyak" : "Pengeluaran Terbanyak";
-
-      chartTitleEl.textContent = titleLabel;
+    
       chartSubtitleEl.textContent =
         `Rincian dengan total ${jenisLabel} terbesar pada bulan ini.`;
-
+    
       top.forEach(item => {
         const percent = (item.total / grandTotal) * 100;
         const percentDisplay = Math.round(percent);
         const widthPercent = maxTotal ? (item.total / maxTotal) * 100 : 0;
-
+    
         const row = document.createElement("div");
         row.className = "chart-bar-row";
         row.innerHTML = `
@@ -786,20 +860,32 @@
         pageTitleEl.textContent = "Filter tidak lengkap";
         emptyStateEl.textContent = "URL kurang lengkap. Pastikan membuka halaman ini lewat kotak rekap bulanan.";
         emptyStateEl.style.display = "block";
-        chartCardEl.style.display = "none";
+        chartCardEl.style.display = (tipe === "sisa") ? "none" : "block";
         return;
       }
 
       pendingEdits.clear();
       updateEditHint();
 
-      pageTitleEl.textContent    = tipeLabel(role, tipe);
-      pageSubtitleEl.textContent = tipeSubtitle(tipe);
-      tagRoleEl.textContent      = `Pelapor: ${role}`;
-      infoBulanEl.innerHTML      = `
-        <span><strong>Bulan:</strong> ${monthLabel(bulanKey)}</span>
-        <span><strong>Kode:</strong> ${bulanKey}</span>
-      `;
+      let tableTitleText = "Rincian Transaksi";
+
+      if (tipe === "pemasukan") {
+        tableTitleText = `Rincian Pemasukan ${role}`;
+      } else if (tipe === "pengeluaran") {
+        tableTitleText = `Rincian Pengeluaran ${role}`;
+      } else if (tipe === "sisa") {
+        tableTitleText = `Rincian Pemasukan & Pengeluaran ${role}`;
+      }
+      
+      tableTitleEl.textContent = tableTitleText;
+      // pengaturan wrap kolom "Rincian":
+      // - pemasukan/pengeluaran: boleh wrap (lebih hemat lebar)
+      // - sisa: jangan wrap (biarkan tabel melebar & bisa scroll horizontal)
+      if (tipe === "sisa") {
+        detailTable.classList.remove("table-can-wrap");
+      } else {
+        detailTable.classList.add("table-can-wrap");
+      }
 
       if (tipe === "sisa") {
         theadRow.innerHTML = `
@@ -942,7 +1028,7 @@
           <tr>
             <td></td>
             <td></td>
-            <td>Total sisa</td>
+            <td>Total Sisa</td>
             <td>${formatRupiah(totalPemasukan)}</td>
             <td>${formatRupiah(totalPengeluaran)}</td>
             <td>${formatRupiah(runningSisa)}</td>
